@@ -1,13 +1,16 @@
 # MARIO (Minimal Articulated Robotic Intelligent Object) – Non-ROS Implementation
 
-This project is a minimal version of [MARIO](https://github.com/SRA-VJTI/MARIO), a low-cost 5 DoF robotic arm developed by SRA-VJTI. The original version is built on ROS, but this version runs entirely without it. Instead, it uses direct serial communication with an ESP32 microcontroller to control the arm.
+This project is a minimal version of [MARIO](https://github.com/SRA-VJTI/MARIO), a low-cost 3 DoF robotic arm developed by SRA-VJTI. The original version is built on ROS, we ditch ROS entirely and go straight to controlling the robot using an ESP32 over serial and HTTP/WebSocket.
 
 The goal was to make MARIO easier to run and test, especially for setups where ROS might be overkill or unavailable.
 
 ## What This Project Does
 
 - Accepts input over serial to control MARIO
-- Supports both direct joint angle control and inverse kinematics from XYZ coordinates
+- Supports:
+    * Direct joint angle control
+    * Inverse kinematics from XYZ coordinates
+    * Web interface control via HTTP and WebSocket
 - Uses ESP32-WROOM-32E as the main controller
 - Can be compiled with ESP-IDF or tested quickly through the Arduino IDE and serial monitor
 
@@ -26,6 +29,10 @@ The goal was to make MARIO easier to run and test, especially for setups where R
 - Correct COM port selected
 
 ## How to Use It
+
+### Make changes in the CMakeList.txt
+- Change the idf_component_register(SRCS "web_socket_control.c" 
+  according to which c file you wanna run and flash
 
 ### Using Arduino IDE
 
@@ -55,6 +62,17 @@ Enter space-separated XYZ coordinates like:
 
 The onboard inverse kinematics algorithm (`inverseKinematics.c`) will convert these coordinates into joint angles and move the arm.
 
+# Web Control (New!)
+ web_control.c + web_socket_control.c
+
+Run a web server directly on ESP32:
+
+  * Control each servo via a clean HTML UI
+
+  * Uses both HTTP and WebSocket for snappy updates and bi-directional control
+
+Access via browser at ESP32's IP (shown in serial logs).
+
 ## File Overview
 
 | File | Description |
@@ -63,6 +81,7 @@ The onboard inverse kinematics algorithm (`inverseKinematics.c`) will convert th
 | `input_coordiantes.c` | Accepts (x, y, z) and uses IK to compute angles |
 | `inverseKinematics.c` | Contains the inverse kinematics logic |
 | `sweep_motion.c` | Sweeps the joints to test motion |
+| `web_socket_control.c` | Real-time control via WebSocket |
 | `CMakeLists.txt` | Build instructions for ESP-IDF |
 | `idf_component.yml` | Component manifest for ESP-IDF |
 
